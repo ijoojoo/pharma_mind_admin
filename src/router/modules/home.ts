@@ -7,7 +7,7 @@ export default {
   path: "/",
   name: "Home",
   component: Layout,
-  redirect: "/welcome",
+  redirect: "/home",
   meta: {
     icon: "ep/home-filled",
     title: $t("menus.pureHome"),
@@ -15,9 +15,9 @@ export default {
   },
   children: [
     {
-      path: "/welcome",
-      name: "Welcome",
-      component: () => import("@/views/welcome/index.vue"),
+      path: "/home",
+      name: "Dashboard",
+      component: () => import("@/views/home/index.vue"),
       meta: {
         title: $t("menus.pureHome"),
         showLink: VITE_HIDE_HOME === "true" ? false : true
