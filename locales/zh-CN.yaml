@@ -61,16 +61,57 @@ panel:
   pureHiddenTags: 隐藏标签页
   pureHiddenFooter: 隐藏页脚
   pureMultiTagsCache: 页签持久化
+
 menus:
+  
+  hsWelcome: 首页
+
+  # BI 分析中心
+  hsBiCenter: BI分析中心
+  hsBiDaily: 当日战报
+  hsBiExplorer: 综合数据查询
+
+  # 运营管理中心
+  hsOperationCenter: 运营管理中心
+  hsProductManagement: 商品管理
+  hsProductInfoManagement: 商品信息管理
+  hsStoreCenter: 门店中心
+  hsEmployeeCenter: 员工中心
+  hsMemberCenter: 会员中心
+
+  # AI 策略中心
+  hsAiStrategy: AI策略中心
+  hsAiMarketing: AI营销策划
+  hsAiCategoryOptimization: AI品类优化
+  hsAiInventoryOptimization: AI库存优化
+  hsAiStaffEnablement: AI员工赋能
+  hsAiChat: 智能对话
+
+  # KPI 考核中心
+  hsKpiCenter: KPI考核中心
+  hsKpiTasks: KPI任务设置
+  hsKpiProgress: KPI任务进度
+
+  # 系统管理
+  hsSystemCenter: 系统管理
+  hsSystemUsers: 用户管理
+  hsSystemRoles: 角色管理
+  hsSystemEnterprise: 企业账户
+
+  # 其他（如有使用）
+  hsBoard: 看板
+  hsGuide: 引导页
+  hsResult: 结果页
+  hsAbout: 关于
+
+
   hshome: 首页
   hsBIAnalysis: BI分析中心
   hsDailyReport: 当日战报
   hsComprehensiveQuery: 综合数据查询
   hsOperationsManagement: 运营管理中心
   hsProductCenter: 商品中心
-  hsStoreCenter: 门店中心
-  hsEmployeeCenter: 员工中心
-  hsMemberCenter: 会员中心
+
   hsAIStrategy: AI策略中心
   hsAIMarketing: AI营销策划
   hsAICategory: AI品类优化
@@ -83,9 +124,7 @@ menus:
   hsUserManagement: 用户管理
   hsRoleManagement: 角色管理
   hsEnterpriseAccount: 企业账户
-  # 这是一个示例，用于您之前创建的商品管理路由
-  hsProductManagement: 商品管理
-  hsProductInfoManagement: 商品信息管理
+
   
   pureHome: 首页
   pureLogin: 登录
@@ -264,3 +303,4 @@ login:
   purePassWordSureReg: 请输入确认密码
   purePassWordDifferentReg: 两次密码不一致!
   purePassWordUpdateReg: 修改密码成功
+

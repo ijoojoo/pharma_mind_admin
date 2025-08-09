@@ -12,7 +12,6 @@ import LaySidebarItem from "../lay-sidebar/components/SidebarItem.vue";
 import LaySidebarFullScreen from "../lay-sidebar/components/SidebarFullScreen.vue";
 
 import GlobalizationIcon from "@/assets/svg/globalization.svg?component";
-import AccountSettingsIcon from "~icons/ri/user-settings-line";
 import LogoutCircleRLine from "~icons/ri/logout-circle-r-line";
 import Setting from "~icons/ri/settings-3-line";
 import Check from "~icons/ep/check";
@@ -35,7 +34,6 @@ const {
   userAvatar,
   backTopMenu,
   avatarsStyle,
-  toAccountSettings,
   getDropdownItemStyle,
   getDropdownItemClass
 } = useNav();
@@ -122,13 +120,6 @@ onMounted(() => {
           <p v-if="username" class="dark:text-white">{{ username }}</p>
         </span>
         <template #dropdown>
-          <el-dropdown-item @click="toAccountSettings">
-            <IconifyIconOffline
-              :icon="AccountSettingsIcon"
-              style="margin: 5px"
-            />
-            {{ t("buttons.pureAccountSettings") }}
-          </el-dropdown-item>
           <el-dropdown-menu class="logout">
             <el-dropdown-item @click="logout">
               <IconifyIconOffline

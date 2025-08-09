@@ -2,17 +2,16 @@
 import { ref, onMounted, reactive } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import {
-  getEmployeeList,
-  createEmployee,
-  updateEmployee,
-  deleteEmployee
-} from "@/api/employee";
-import type { Employee } from "@/api/employee";
-// 假设您有一个获取门店列表的API，用于下拉选择
-// import { getStoreList } from "@/api/store";
+  getProductList,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  requestAIAutoCategorize
+} from "@/api/product";
+import type { Product } from "@/api/product";
 
 defineOptions({
-  name: "EmployeeManagement"
+  name: "ProductManagement"
 });
 
 // --- 类型定义 ---
@@ -29,7 +28,8 @@ type TableColumnList = TableColumn[];
 
 // --- 响应式状态定义 ---
 const loading = ref(true);
-const tableData = ref<Employee[]>([]);
+const aiLoading = ref(false); // 用于AI按钮的加载状态
+const tableData = ref<Product[]>([]);
 const searchTerm = ref("");
 const pagination = reactive({
   total: 0,
@@ -38,25 +38,24 @@ const pagination = reactive({
 });
 
 const dialogVisible = ref(false);
-const dialogTitle = ref("编辑员工");
+const dialogTitle = ref("编辑商品");
 const formRef = ref();
-const formData = reactive<Partial<Employee>>({
+const formData = reactive<Partial<Product>>({
   id: null,
-  source_employee_id: "",
-  employee_number: "",
+  product_code: "",
   name: "",
-  phone: "",
-  store: null
+  specification: "",
+  manufacturer: "",
+  retail_price: 0
 });
-
-const storeList = ref([]); // 用于存放门店下拉列表
 
 // --- 表格列定义 ---
 const columns: TableColumnList = [
-  { label: "工号", prop: "employee_number", minWidth: 120 },
-  { label: "姓名", prop: "name", minWidth: 150 },
-  { label: "手机号", prop: "phone", minWidth: 150 },
-  { label: "所属门店", prop: "store_name", minWidth: 180 }, // 假设后端会返回store_name
+  { label: "商品编码", prop: "product_code", minWidth: 120 },
+  { label: "商品名称", prop: "name", minWidth: 180 },
+  { label: "规格", prop: "specification", minWidth: 150 },
+  { label: "生产企业", prop: "manufacturer", minWidth: 180 },
+  { label: "零售价 (元)", prop: "retail_price", minWidth: 120, align: "right" },
   {
     label: "操作",
     slot: "operation",
@@ -70,7 +69,7 @@ const columns: TableColumnList = [
 const fetchData = async () => {
   loading.value = true;
   try {
-    const { data } = await getEmployeeList({
+    const { data } = await getProductList({
       page: pagination.currentPage,
       page_size: pagination.pageSize,
       search: searchTerm.value
@@ -78,27 +77,11 @@ const fetchData = async () => {
     tableData.value = data.results;
     pagination.total = data.count;
   } catch (error) {
-    console.error("获取员工列表失败:", error);
-    ElMessage.error("获取员工列表失败，请稍后重试。");
+    console.error("获取商品列表失败:", error);
+    ElMessage.error("获取商品列表失败，请稍后重试。");
   } finally {
     loading.value = false;
   }
-};
-
-// 获取门店列表用于下拉框
-const fetchStores = async () => {
-  // 提示：请取消注释并实现真实的API调用
-  // try {
-  //   const { data } = await getStoreList({ page_size: 999 }); // 获取所有门店
-  //   storeList.value = data.results;
-  // } catch (error) {
-  //   console.error("获取门店列表失败:", error);
-  // }
-  // --- 使用模拟数据 ---
-  storeList.value = [
-    { id: 1, name: "总部中心店" },
-    { id: 2, name: "洛阳涧西店" }
-  ];
 };
 
 // --- 事件处理函数 ---
@@ -108,32 +91,32 @@ const handleSearch = () => {
 };
 
 const handleAdd = () => {
-  dialogTitle.value = "新增员工";
+  dialogTitle.value = "新增商品";
   Object.assign(formData, {
     id: null,
-    source_employee_id: "",
-    employee_number: "",
+    product_code: "",
     name: "",
-    phone: "",
-    store: null
+    specification: "",
+    manufacturer: "",
+    retail_price: 0
   });
   dialogVisible.value = true;
 };
 
-const handleEdit = (row: Employee) => {
-  dialogTitle.value = "编辑员工";
+const handleEdit = (row: Product) => {
+  dialogTitle.value = "编辑商品";
   Object.assign(formData, row);
   dialogVisible.value = true;
 };
 
-const handleDelete = (row: Employee) => {
-  ElMessageBox.confirm(`您确定要删除员工【${row.name}】吗？`, "警告", {
+const handleDelete = (row: Product) => {
+  ElMessageBox.confirm(`您确定要删除商品【${row.name}】吗？`, "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
   })
     .then(async () => {
-      await deleteEmployee(row.id);
+      await deleteProduct(row.id);
       ElMessage.success("删除成功");
       fetchData();
     })
@@ -143,8 +126,8 @@ const handleDelete = (row: Employee) => {
 const handleSave = async () => {
   try {
     const apiCall = formData.id
-      ? updateEmployee(formData.id, formData)
-      : createEmployee(formData);
+      ? updateProduct(formData.id, formData)
+      : createProduct(formData);
 
     await apiCall;
     ElMessage.success(formData.id ? "更新成功" : "新增成功");
@@ -154,6 +137,32 @@ const handleSave = async () => {
     console.error("保存失败:", error);
     ElMessage.error("操作失败，请稍后重试。");
   }
+};
+
+const handleAutoCategorize = () => {
+  ElMessageBox.confirm(
+    "这将对所有未分类的商品进行AI自动分类，可能会消耗较多Token。确定要继续吗？",
+    "AI自动分类确认",
+    {
+      confirmButtonText: "开始分类",
+      cancelButtonText: "取消",
+      type: "info"
+    }
+  )
+    .then(async () => {
+      aiLoading.value = true;
+      try {
+        const { message } = await requestAIAutoCategorize();
+        ElMessage.success(message || "AI分类任务已成功触发！");
+        fetchData();
+      } catch (error) {
+        console.error("AI自动分类失败:", error);
+        ElMessage.error("AI自动分类失败，请稍后重试。");
+      } finally {
+        aiLoading.value = false;
+      }
+    })
+    .catch(() => {});
 };
 
 const handleSizeChange = (val: number) => {
@@ -169,7 +178,6 @@ const handleCurrentChange = (val: number) => {
 // --- 生命周期钩子 ---
 onMounted(() => {
   fetchData();
-  fetchStores();
 });
 </script>
 
@@ -179,12 +187,13 @@ onMounted(() => {
       <template #header>
         <div class="flex justify-between items-center">
           <div class="flex items-center space-x-2">
-            <el-button type="primary" @click="handleAdd">新增员工</el-button>
+            <el-button type="primary" @click="handleAdd">新增商品</el-button>
+            <el-button>批量操作</el-button>
           </div>
           <div class="flex items-center space-x-2">
             <el-input
               v-model="searchTerm"
-              placeholder="搜索员工姓名或工号..."
+              placeholder="搜索商品名称或编码..."
               clearable
               style="width: 240px"
               @keyup.enter="handleSearch"
@@ -194,6 +203,19 @@ onMounted(() => {
         </div>
       </template>
 
+      <div class="flex items-center space-x-2 mb-4">
+        <span class="text-sm font-semibold text-gray-700">AI 功能:</span>
+        <el-button
+          link
+          type="primary"
+          :loading="aiLoading"
+          @click="handleAutoCategorize"
+          >自动分类</el-button
+        >
+        <el-button link type="primary">价格带分析</el-button>
+        <el-button link type="primary">重点品种挖掘</el-button>
+      </div>
+
       <pure-table
         :data="tableData"
         :columns="columns"
@@ -201,7 +223,7 @@ onMounted(() => {
         :pagination="pagination"
         stripe
         border
-        height="600"
+        height="500"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       >
@@ -223,34 +245,31 @@ onMounted(() => {
       draggable
     >
       <el-form ref="formRef" :model="formData" label-width="100px">
-        <el-form-item label="源系统ID">
+        <el-form-item label="商品编码">
           <el-input
-            v-model="formData.source_employee_id"
+            v-model="formData.product_code"
             :disabled="!!formData.id"
+            placeholder="如果是新增，将自动生成"
           />
         </el-form-item>
-        <el-form-item label="工号">
-          <el-input v-model="formData.employee_number" />
-        </el-form-item>
-        <el-form-item label="姓名">
+        <el-form-item label="商品名称">
           <el-input v-model="formData.name" />
         </el-form-item>
-        <el-form-item label="手机号">
-          <el-input v-model="formData.phone" />
+        <el-form-item label="规格">
+          <el-input v-model="formData.specification" />
         </el-form-item>
-        <el-form-item label="所属门店">
-          <el-select
-            v-model="formData.store"
-            placeholder="请选择所属门店"
+        <el-form-item label="生产企业">
+          <el-input v-model="formData.manufacturer" />
+        </el-form-item>
+        <el-form-item label="零售价 (元)">
+          <el-input-number
+            v-model="formData.retail_price"
+            :precision="2"
+            :step="1"
+            :min="0"
+            controls-position="right"
             style="width: 100%"
-          >
-            <el-option
-              v-for="item in storeList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
+          />
         </el-form-item>
       </el-form>
       <template #footer>

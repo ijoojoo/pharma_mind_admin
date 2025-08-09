@@ -1,6 +1,6 @@
 // --- src/router/modules/member.ts ---
 import { $t } from "@/plugins/i18n";
-import { MenuRankEnum } from "@/router/enums";
+import { member_management } from "@/router/enums";
 const Layout = () => import("@/layout/index.vue");
 
 export default {
@@ -10,7 +10,7 @@ export default {
   meta: {
     icon: "ri:user-heart-line",
     title: $t("menus.hsMemberCenter"),
-    rank: MenuRankEnum.MEMBER_MANAGEMENT
+    rank: member_management
   },
   children: [
     {

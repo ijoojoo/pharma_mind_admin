@@ -5,7 +5,7 @@ import { responsiveStorageNameSpace } from "@/config";
 import { storageLocal, isObject } from "@pureadmin/utils";
 
 // element-plus国际化
-import enLocale from "element-plus/es/locale/lang/en";
+// import enLocale from "element-plus/es/locale/lang/en";
 import zhLocale from "element-plus/es/locale/lang/zh-cn";
 
 const siphonI18n = (function () {
@@ -27,10 +27,6 @@ export const localesConfigs = {
   zh: {
     ...siphonI18n("zh-CN"),
     ...zhLocale
-  },
-  en: {
-    ...siphonI18n("en"),
-    ...enLocale
   }
 };
 

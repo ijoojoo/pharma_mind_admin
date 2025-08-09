@@ -1,6 +1,6 @@
 // --- src/router/modules/kpi.ts ---
 import { $t } from "@/plugins/i18n";
-import { MenuRankEnum } from "@/router/enums";
+import { kpi_assessment } from "@/router/enums";
 const Layout = () => import("@/layout/index.vue");
 
 export default {
@@ -10,7 +10,7 @@ export default {
   meta: {
     icon: "ri:line-chart-line",
     title: $t("menus.hsKPIAssessment"),
-    rank: MenuRankEnum.KPI_ASSESSMENT
+    rank: kpi_assessment
   },
   children: [
     {

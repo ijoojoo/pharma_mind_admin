@@ -1,6 +1,6 @@
 // --- src/router/modules/store.ts ---
 import { $t } from "@/plugins/i18n";
-import { MenuRankEnum } from "@/router/enums";
+import { store_management } from "@/router/enums";
 const Layout = () => import("@/layout/index.vue");
 
 export default {
@@ -10,7 +10,7 @@ export default {
   meta: {
     icon: "ri:store-2-line",
     title: $t("menus.hsStoreCenter"),
-    rank: MenuRankEnum.STORE_MANAGEMENT
+    rank: store_management
   },
   children: [
     {

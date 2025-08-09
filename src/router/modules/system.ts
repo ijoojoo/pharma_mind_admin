@@ -1,6 +1,6 @@
 // --- src/router/modules/system.ts ---
 import { $t } from "@/plugins/i18n";
-import { MenuRankEnum } from "@/router/enums";
+import { system_management } from "@/router/enums";
 const Layout = () => import("@/layout/index.vue");
 
 export default {
@@ -10,7 +10,7 @@ export default {
   meta: {
     icon: "ri:settings-3-line",
     title: $t("menus.hsSystemManagement"),
-    rank: MenuRankEnum.SYSTEM_MANAGEMENT
+    rank: system_management
   },
   children: [
     {
