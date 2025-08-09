@@ -1,48 +1,102 @@
-// api/dashboard.ts
-
+// src/api/welcome/index.ts
+// PureAdmin 项目里的 http 是命名导出
 import { http } from "@/utils/http";
 
-// 获取核心指标数据
-export const getCoreMetrics = (dateRange: string) => {
-  return http.request("get", `/api/metrics/core?range=${dateRange}`);
-};
+export type Role = "director" | "manager";
+export type MetricKey = "amount" | "profit" | "traffic";
 
-// 获取AI运营速报
-export const getAIOperationReport = () => {
-  return http.request("get", "/api/ai/operation-report");
-};
+export interface TodayKpiRespItem {
+  value: number;
+  target: number;
+  hb: number; // 环比
+  yb: number; // 同比
+}
+export interface TodayKpisResp {
+  amount: TodayKpiRespItem;
+  profit: TodayKpiRespItem;
+  traffic: TodayKpiRespItem;
+  member: TodayKpiRespItem;
+}
 
-// 获取AI风险预警
-export const getAIRiskAlert = () => {
-  return http.request("get", "/api/ai/risk-alert");
-};
+export interface TodayHourlyResp {
+  hours: string[]; // 例如 ["8:00",...,"22:00"]
+  sales: number[]; // 销售额
+  traffic: number[]; // 客流
+  profit: number[]; // 毛利额
+}
 
-// 获取关键指标趋势图数据
-export const getMetricsTrend = (dateRange: string) => {
-  return http.request("get", `/api/metrics/trend?range=${dateRange}`);
-};
+export interface SevenDaysResp {
+  dates: string[]; // 近7日 ["08/03",...]
+  values: number[]; // 指标值
+  avgTicket: number[]; // 平均客单价
+}
 
-// 获取KPI任务完成进度
-export const getKPITaskProgress = () => {
-  return http.request("get", "/api/kpi/task-progress");
-};
+export interface StoreKpiItem {
+  store: string;
+  target: number;
+  current: number;
+  type: "daily" | "range";
+  start?: string;
+  end?: string;
+}
 
-// 获取龙虎榜数据（门店、人员、产品）
-export const getLeaderboard = (category: string) => {
-  return http.request("get", `/api/leaderboard/${category}`);
-};
+export interface AiReviewReq {
+  role: Role;
+  start: string; // YYYY-MM-DD
+  end: string; // YYYY-MM-DD
+  store_ids?: string[];
+}
+export interface AiReviewResp {
+  summary: {
+    totalSales: string;
+    peakHour: string;
+    bestStore: string;
+    avgCompletion: number; // 0~1
+    timeProgress: number; // 0~1
+  };
+  highlights: string[];
+  risks: string[];
+  actions: string[];
+}
 
-// 获取库存风险雷达数据
-export const getInventoryRiskRadar = () => {
-  return http.request("get", "/api/inventory/risk-radar");
-};
+// ---- 统一使用 http.request ----
 
-// 获取会员增长与活跃情况
-export const getMemberGrowth = () => {
-  return http.request("get", "/api/member/growth");
-};
+export function getTodayKpis(params?: { store_ids?: string[] }) {
+  return http.request<TodayKpisResp>("get", "/api/welcome/today-kpis/", {
+    params
+  });
+}
 
-// 获取员工赋能情况
-export const getEmployeeEmpowerment = () => {
-  return http.request("get", "/api/employee/empowerment");
-};
+export function getTodayHourly(params?: { store_ids?: string[] }) {
+  return http.request<TodayHourlyResp>("get", "/api/welcome/today-hourly/", {
+    params
+  });
+}
+
+export function getSevenDays(params: {
+  metric: MetricKey;
+  store_ids?: string[];
+}) {
+  return http.request<SevenDaysResp>("get", "/api/welcome/seven-days/", {
+    params
+  });
+}
+
+export function getStoreKpiProgress(params: {
+  mode: "daily" | "range";
+  start?: string;
+  end?: string;
+  store_ids?: string[];
+}) {
+  return http.request<StoreKpiItem[]>(
+    "get",
+    "/api/welcome/store-kpi-progress/",
+    { params }
+  );
+}
+
+export function postAiReview(data: AiReviewReq) {
+  return http.request<AiReviewResp>("post", "/api/welcome/ai-review/", {
+    data
+  });
+}
